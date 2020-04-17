@@ -1,0 +1,30 @@
+{
+    "client_numbers": 1,
+    "log_path": {
+        "folder_path": "../tests/",
+        "client_search": "client%d_search_time.txt",
+        "client_lookup": "client%d_lookup_time.txt",
+        "client_buy": "client%d_buy_time.txt",
+        "frontend_search": "frontend_search_time.txt",
+        "frontend_lookup": "frontend_lookup_time.txt",
+        "frontend_buy": "frontend_buy_time.txt",
+        "catalog_search": "catalog_search_time.txt",
+        "catalog_lookup": "catalog_lookup_time.txt",
+        "catalog_buy": "catalog_buy_time.txt",
+        "order_buy": "order_buy_time.txt"
+    },
+    "ip": {
+        "frontend": {
+            "addr": "128.119.243.147",
+            "port": 5077
+        },
+        "catalog": {
+            "addr": "128.119.243.164",
+            "port": 5066
+        },
+        "order": {
+            "addr": "128.119.243.175",
+            "port": 5088
+        }
+    }
+}

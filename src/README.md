@@ -1,3 +1,22 @@
-# 677 Lab 2
+# Structures
+Scripts for deployment and termination:
+- run.sh
+- terminate.sh
 
-This directory should contain your source code. Be sure to include comments in your code for us to understand it.
+Global config:
+- config.json
+
+Frontend tier:
+- frontend.py
+- define_frontend.json
+
+Backend tier:
+- catalog_server.py
+- catalog.csv
+- order_server.py
+
+Client:
+- client.py
+
+Evaluation:
+- evaluate.py
