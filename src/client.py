@@ -54,7 +54,6 @@ class Client(thd.Thread):
             if action == SEARCH:
                 topic = random.choice(list(DEFINE['topics'].values()))
                 params = {
-                    'withoutUI': True,
                     'topic': topic
                 }
                 
@@ -73,7 +72,6 @@ class Client(thd.Thread):
             elif action == LOOKUP:
                 item_num = random.randint(1, 4)
                 params = {
-                    'withoutUI': True,
                     'lookupNum': item_num
                 }
 
@@ -92,7 +90,6 @@ class Client(thd.Thread):
             else:
                 item_num = random.randint(1, 4)
                 params = {
-                    'withoutUI': True,
                     'buyNum': item_num
                 }
 

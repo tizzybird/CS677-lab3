@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask import render_template, redirect
 
 from datetime import datetime
+import logging
 
 import json
 import requests as rq
@@ -26,6 +27,7 @@ app = Flask(__name__)
 @app.route('/search', methods=['GET'])
 def search():
     start_time = datetime.now()
+    
     topic_val = request.values.get('topic')
     lookup_num = request.values.get('lookupNum')
     ###################################################
@@ -44,22 +46,19 @@ def search():
         else:
             results = [DEFINE["booklist"][int(lookup_num) - 1]]
         
-        if request.values.get('withoutUI'):
-            end_time = datetime.now()
-            diff = (end_time - start_time).total_seconds()
-            if topic_val == "":
-                with open(log_search, 'a') as f:
-                    f.write('%f\n' % diff)
-            else:
-                with open(log_lookup, 'a') as f:
-                    f.write('%f\n' % diff)
+        end_time = datetime.now()
+        diff = (end_time - start_time).total_seconds()
+        if topic_val == "":
+            with open(log_search, 'a') as f:
+                f.write('%f\n' % diff)
+        else:
+            with open(log_lookup, 'a') as f:
+                f.write('%f\n' % diff)
 
-            return json.dumps({ "results": results })
-
-        return render_template('homepage.html', results=results, topicVal=topic_val, lookupVal=lookup_num)
+        return json.dumps({ "results": results })
 
     #######################################
-    # For invoking micro services
+    # Invoking micro services
     # for topic searching
     if topic_val is not None:
         res = rq.get(ip_catalog + 'search/%s' % topic_val)
@@ -68,7 +67,6 @@ def search():
     if lookup_num is not None:
         res = rq.get(ip_catalog + 'lookup/%s' % lookup_num)
 
-    # if request.values.get('withoutUI'):
     end_time = datetime.now()
     diff = (end_time - start_time).total_seconds()
     if topic_val is None:
@@ -93,18 +91,14 @@ def buy():
         with open(log_buy, 'a') as f:
             f.write('%f\n' % diff)
 
-        if request.values.get('withoutUI'):
-            return json.dumps({
-                "results": [DEFINE["booklist"][buy_num]]
-            })
+        return json.dumps({
+            "results": [DEFINE["booklist"][buy_num]]
+        })
         
-        return redirect('/')
-
     #######################################
     # For invoking micro services
     res = rq.get(ip_order + 'buy/%s' % buy_num) 
 
-    # if request.values.get('withoutUI'):
     end_time = datetime.now()
     diff = (end_time - start_time).total_seconds()
     with open(log_buy, 'a') as f:
