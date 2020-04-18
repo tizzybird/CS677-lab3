@@ -21,7 +21,10 @@ LOOKUP = 2
 BUY    = 3
 
 actions = [SEARCH, LOOKUP, BUY]
+
 ip_frontend = "http://%s:%d/" % (CONFIG["ip"]["frontend"]["addr"], CONFIG["ip"]["frontend"]["port"])
+if DEFINE["testenv"] == 0:
+    ip_frontend = "http://localhost:5000/"
 
 log_search = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["client_search"]
 log_lookup = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["client_lookup"]

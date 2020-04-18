@@ -28,85 +28,68 @@ app = Flask(__name__)
 def search():
     start_time = datetime.now()
     
-    topic_val = request.values.get('topic')
-    lookup_num = request.values.get('lookupNum')
     ###################################################
-    # For testing on localhost, please OMIT this part
-    if DEFINE["testenv"] == 0:
-        if topic_val is None:
-            topic_val = ""
-        else:
-            results = []
+    topic_val = request.values.get('topic')
+    if topic_val is not None:
+        if DEFINE["testenv"] == 0:
+            res = []
             for item in DEFINE["booklist"]:
                 if item["topic"] == topic_val:
-                    results.append(item)
-
-        if lookup_num is None:
-            lookup_num = ""
+                    res.append(item)
+            result = {"result": json.dumps(res)}
         else:
-            results = [DEFINE["booklist"][int(lookup_num) - 1]]
+            res = rq.get(ip_catalog + 'search/%s' % topic_val)
+            result = res.json()
         
         end_time = datetime.now()
         diff = (end_time - start_time).total_seconds()
-        if topic_val == "":
-            with open(log_search, 'a') as f:
-                f.write('%f\n' % diff)
-        else:
-            with open(log_lookup, 'a') as f:
-                f.write('%f\n' % diff)
-
-        return json.dumps({ "results": results })
-
-    #######################################
-    # Invoking micro services
-    # for topic searching
-    if topic_val is not None:
-        res = rq.get(ip_catalog + 'search/%s' % topic_val)
-
-    # for item lookup
-    if lookup_num is not None:
-        res = rq.get(ip_catalog + 'lookup/%s' % lookup_num)
-
-    end_time = datetime.now()
-    diff = (end_time - start_time).total_seconds()
-    if topic_val is None:
         with open(log_search, 'a') as f:
             f.write('%f\n' % diff)
-    else:
+
+        return result
+
+    ###################################################
+    lookup_num = request.values.get('lookupNum')
+    if lookup_num is not None:
+        if DEFINE["testenv"] == 0:
+            res = [DEFINE["booklist"][int(lookup_num) - 1]]
+            result = {"result": json.dumps(res)}
+        else:
+            res = rq.get(ip_catalog + 'lookup/%s' % lookup_num)
+            result = res.json()
+        
+        end_time = datetime.now()
+        diff = (end_time - start_time).total_seconds()
         with open(log_lookup, 'a') as f:
             f.write('%f\n' % diff)
 
-    return res.json()
+        # return json.dumps({ "results": results })
+        return result
+
+    return "Failed", 201
 
 
 @app.route('/buy', methods=['POST'])
 def buy():
     start_time = datetime.now()
     buy_num = request.values.get('buyNum')
-    ###################################################
-    # For testing on localhost, please OMIT this part
+
     if DEFINE["testenv"] == 0:
-        end_time = datetime.now()
-        diff = (end_time - start_time).total_seconds()
-        with open(log_buy, 'a') as f:
-            f.write('%f\n' % diff)
-
         return json.dumps({
-            "results": [DEFINE["booklist"][buy_num]]
+            "result": [DEFINE["booklist"][int(buy_num)]]
         })
-        
-    #######################################
-    # For invoking micro services
-    res = rq.get(ip_order + 'buy/%s' % buy_num) 
-
+    else:
+        res = rq.get(ip_order + 'buy/%s' % buy_num) 
+    
     end_time = datetime.now()
     diff = (end_time - start_time).total_seconds()
     with open(log_buy, 'a') as f:
         f.write('%f\n' % diff)
-        
+
+    #TODO
     if res.status_code == 200 and res.json()["BuyStatus"] == "Success":
         return "Success"
-        
+
     return "Failed", 201
 
 
@@ -114,4 +97,7 @@ def buy():
 def homepage():
     return render_template('homepage.html', isDefault=True, booklist=DEFINE["booklist"])
 
-app.run(host=CONFIG["ip"]["frontend"]["addr"], port=CONFIG["ip"]["frontend"]["port"])
+if DEFINE["testenv"] == 0:
+    app.run(host="localhost", port="5000")
+else:
+    app.run(host=CONFIG["ip"]["frontend"]["addr"], port=CONFIG["ip"]["frontend"]["port"])
