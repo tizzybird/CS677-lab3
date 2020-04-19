@@ -95,11 +95,6 @@ def buy():
     return "Failed", 201
 
 
-@app.route('/', methods=['GET'])
-def homepage():
-    return render_template('homepage.html', isDefault=True, booklist=DEFINE["booklist"])
-
-
 if __name__ == '__main__':
     if DEFINE["testenv"] == 0:
         app.run(host="localhost", port="5000", processes=2, threaded=False)
