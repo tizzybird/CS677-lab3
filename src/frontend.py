@@ -2,11 +2,11 @@ from flask import Flask, request, jsonify
 from flask import render_template, redirect
 
 from datetime import datetime
-# import logging
 
 import json
 import requests as rq
-import remote
+
+import remote, cache
 
 # common config
 with open('config.json') as f:
@@ -15,9 +15,6 @@ with open('config.json') as f:
 # frontend defines
 with open('define_frontend.json') as f:
     DEFINE = json.load(f)
-
-# ip_catalog = "http://%s:%d/" % (CONFIG["ip"]["catalog"]["addr"], CONFIG["ip"]["catalog"]["port"])
-# ip_order   = "http://%s:%d/" % (CONFIG["ip"]["order"]["addr"], CONFIG["ip"]["order"]["port"])
 
 log_search = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["frontend_search"]
 log_lookup = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["frontend_lookup"]
@@ -31,17 +28,23 @@ def search():
     ###################################################
     topic_val = request.values.get('topic')
     if topic_val is not None:
-        if DEFINE["testenv"] == 0:
+        key = repr(('topic', topic_val))
+        cache_ret = cache.get(key)
+        if cache_ret is not None:
+            result = cache_ret
+        elif DEFINE["testenv"] == 0:
             res = []
             for item in DEFINE["booklist"]:
                 if item["topic"] == topic_val:
                     res.append(item)
-            # result = {"result": json.dumps(res)}
+
             result = jsonify(result=res)
+            cache.set_pair(key, result)
         else:
             ip = remote.get_catalog_ip(app.logger)
             res = rq.get(ip + 'search/%s' % topic_val)
             result = res.json()
+            cache.set_pair(key, result)
 
         end_time = datetime.now()
         diff = (end_time - start_time).total_seconds()
@@ -53,14 +56,20 @@ def search():
     ###################################################
     lookup_num = request.values.get('lookupNum')
     if lookup_num is not None:
-        if DEFINE["testenv"] == 0:
+        key = repr(('lookupNum', lookup_num))
+        cache_ret = cache.get(key)
+
+        if cache_ret is not None:
+            result = cache_ret
+        elif DEFINE["testenv"] == 0:
             res = [DEFINE["booklist"][int(lookup_num) - 1]]
-            # result = {"result": json.dumps(res)}
             result = jsonify(result=res)
+            cache.set_pair(key, result)
         else:
             ip = remote.get_catalog_ip(app.logger)
             res = rq.get(ip + 'lookup/%s' % lookup_num)
             result = res.json()
+            cache.set_pair(key, result)
         
         end_time = datetime.now()
         diff = (end_time - start_time).total_seconds()
@@ -76,8 +85,10 @@ def search():
 def buy():
     start_time = datetime.now()
     buy_num = request.values.get('buyNum')
+    key = repr(('lookupNum', buy_num))
 
     if DEFINE["testenv"] == 0:
+        cache.remove(key)
         return jsonify(result=[DEFINE["booklist"][int(buy_num)]])
     else:
         ip = remote.get_order_ip(app.logger)
@@ -90,6 +101,7 @@ def buy():
 
     #TODO
     if res.status_code == 200 and res.json()["BuyStatus"] == "Success":
+        cache.remove(key)
         return "Success"
 
     return "Failed", 201

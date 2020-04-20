@@ -1,5 +1,5 @@
 {
-    "testenv": 1,
+    "testenv": 0,
     "topics": {
         "DS": "distributed systems",
         "GS": "graduate school"
@@ -19,6 +19,18 @@
     }, {
         "number": 4,
         "title": "Cooking for the Impatient Graduate Student.",
+        "topic": "GS"
+    }, {
+        "number": 5,
+        "title": "How to finish Project 3 on time",
+        "topic": "DS"
+    }, {
+        "number": 6,
+        "title": "Why theory classes are so hard",
+        "topic": "GS"
+    }, {
+        "number": 7,
+        "title": "Spring in the Pioneer Valley",
         "topic": "GS"
     }]
 }
