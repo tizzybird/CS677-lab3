@@ -3,13 +3,12 @@ import json
 from multiprocessing import Value, Manager
 import multiprocessing as mp
 
-import asyncio
-# import requests as rq
+# import asyncio
+import requests as rq
 import time
 
 UNKNOWN = 0
 ONLINE  = 1
-HEARBEAT_GAP = 4
 
 reset_value = 999999
 
@@ -70,15 +69,19 @@ def get_server(server_type, logger=None):
 
 
 def heartbeat(pairs, logger):
-    # pairs = [(order_servers, order_status), (catalog_servers, catalog_status)]
+    # TODO: asyncio
+    # loop = asyncio.get_event_loop()
+    # async def ping(ip, index, proxy):
+    #     res = await loop.run_in_executor(None, requests.get, url)
+
     while True:
         for servers, status in pairs:
             for index in range(len(servers)):
                 server = servers[index]
-
                 ip = "http://%s:%d/echo" % (server["addr"], server["port"])
                 try:
                     res = rq.get(ip, timeout=5)
+                    res.raise_for_status()
                     status[index] = {
                         "status": ONLINE,
                         "retry": 0
@@ -96,9 +99,11 @@ def heartbeat(pairs, logger):
 
 def start_hearbeat(logger):
     pairs = [(order_servers, order_status), (catalog_servers, catalog_status)]
-    logger.info("Starting heartbeat demon..")
-    p = mp.Process(target=heartbeat, args=(pairs, logger))
-    p.start()
+    logger.warning("Starting heartbeat demon..")
+    proc = mp.Process(target=heartbeat, args=(pairs, logger))
+    proc.start()
+
+    return proc
 
 
 ################################

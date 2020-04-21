@@ -1,5 +1,6 @@
 {
     "testenv": 0,
+    "timeout": 8,
     "topics": {
         "DS": "distributed systems",
         "GS": "graduate school"
@@ -32,5 +33,68 @@
         "number": 7,
         "title": "Spring in the Pioneer Valley",
         "topic": "GS"
-    }]
+    }],
+    "logConfig": {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+            },
+            "time_diff": {
+                "format": "%(message)f"
+            },
+            "heartbeat": {
+                "format": "[%(asctime)s]: %(message)s"
+            }
+        },
+        "handlers": {
+            "wsgi": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://flask.logging.wsgi_errors_stream",
+                "formatter": "default"
+            },
+            "f_search": {
+                "class": "logging.FileHandler",
+                "filename": "frontend_search_time.log",
+                "formatter": "time_diff"
+            },
+            "f_lookup": {
+                "class": "logging.FileHandler",
+                "filename": "frontend_lookup_time.log",
+                "formatter": "time_diff"
+            },
+            "f_buy": {
+                "class": "logging.FileHandler",
+                "filename": "frontend_buy_time.log",
+                "formatter": "time_diff"
+            },
+            "heartbeat": {
+                "class": "logging.FileHandler",
+                "filename": "frontend_heartbeat.log",
+                "formatter": "heartbeat"
+            }
+        },
+        "loggers": {
+            "search": {
+                "level": "INFO",
+                "handlers": ["f_search"]
+            },
+            "lookup": {
+                "level": "INFO",
+                "handlers": ["f_lookup"]
+            },
+            "buy": {
+                "level": "INFO",
+                "handlers": ["f_buy"]
+            },
+            "heartbeat": {
+                "level": "DEBUG",
+                "handlers": ["heartbeat"]
+            }
+        },
+        "root": {
+            "level": "INFO",
+            "handlers": ["wsgi"]
+        }
+    }
 }

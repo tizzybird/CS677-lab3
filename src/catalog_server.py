@@ -90,6 +90,9 @@ def update(item_no):
     sem.release()
     return jsonify({}), 201
 
+@app.route('/echo', methods=['GET'])
+def echo():
+    return "OK", 200
 
 if __name__ == '__main__':
     app.run(host=HOST_IP, port=HOST_PORT, threaded=True)

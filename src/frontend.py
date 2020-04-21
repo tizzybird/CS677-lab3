@@ -1,13 +1,4 @@
-from flask import Flask, request, jsonify
-from flask import render_template, redirect
-
-from datetime import datetime
-
 import json
-import requests as rq
-
-import remote, cache
-
 # common config
 with open('config.json') as f:
     CONFIG = json.load(f)
@@ -16,9 +7,18 @@ with open('config.json') as f:
 with open('define_frontend.json') as f:
     DEFINE = json.load(f)
 
-log_search = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["frontend_search"]
-log_lookup = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["frontend_lookup"]
-log_buy    = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["frontend_buy"]
+
+import logging
+from logging.config import dictConfig
+
+dictConfig(DEFINE['logConfig'])
+
+
+from flask import Flask, request, jsonify
+from datetime import datetime
+import requests as rq
+
+import remote, cache
 
 app = Flask(__name__)
 
@@ -37,19 +37,26 @@ def search():
             for item in DEFINE["booklist"]:
                 if item["topic"] == topic_val:
                     res.append(item)
-
+            ip = remote.get_server("catalog", app.logger)
             result = jsonify(result=res)
             cache.set_pair(key, result)
         else:
-            ip = remote.get_catalog_ip(app.logger)
-            res = rq.get(ip + 'search/%s' % topic_val)
+            while True:
+                ip = remote.get_server("catalog", app.logger)
+                try:
+                    res = rq.get(ip + 'search/%s' % topic_val, timeout=DEFINE["timeout"])
+                    res.raise_for_status()
+                    break
+                except:
+                    pass
+
             result = res.json()
             cache.set_pair(key, result)
 
         end_time = datetime.now()
         diff = (end_time - start_time).total_seconds()
-        with open(log_search, 'a') as f:
-            f.write('%f\n' % diff)
+
+        logging.getLogger('search').info(diff)
 
         return result
 
@@ -66,15 +73,22 @@ def search():
             result = jsonify(result=res)
             cache.set_pair(key, result)
         else:
-            ip = remote.get_catalog_ip(app.logger)
-            res = rq.get(ip + 'lookup/%s' % lookup_num)
+            while True:
+                ip = remote.get_server(app.logger)
+                try:
+                    res = rq.get(ip + 'lookup/%s' % lookup_num)
+                    res.raise_for_status()
+                    break
+                except:
+                    pass
+
             result = res.json()
             cache.set_pair(key, result)
         
         end_time = datetime.now()
         diff = (end_time - start_time).total_seconds()
-        with open(log_lookup, 'a') as f:
-            f.write('%f\n' % diff)
+        
+        logging.getLogger('lookup').info(diff)
 
         return result
 
@@ -91,13 +105,19 @@ def buy():
         cache.remove(key)
         return jsonify(result=[DEFINE["booklist"][int(buy_num)]])
     else:
-        ip = remote.get_order_ip(app.logger)
-        res = rq.get(ip + 'buy/%s' % buy_num)
+        while True:
+            ip = remote.get_server("order", app.logger)
+            try:
+                res = rq.get(ip + 'buy/%s' % buy_num)
+                res.raise_for_status()
+                break
+            except:
+                pass
     
     end_time = datetime.now()
     diff = (end_time - start_time).total_seconds()
-    with open(log_buy, 'a') as f:
-        f.write('%f\n' % diff)
+
+    logging.getLogger('buy').info(diff)
 
     #TODO
     if res.status_code == 200 and res.json()["BuyStatus"] == "Success":
@@ -109,7 +129,11 @@ def buy():
 
 if __name__ == '__main__':
     if DEFINE["testenv"] == 0:
-        app.run(host="localhost", port="5000", processes=2, threaded=False)
+        # proc = remote.start_hearbeat(logging.getLogger('heartbeat'))
+        app.run(host="localhost", port="5000", processes=5, threaded=False)
     else:
-        app.run(host=CONFIG["ip"]["frontend"]["addr"], port=CONFIG["ip"]["frontend"]["port"])
+        proc = remote.start_hearbeat(logging.getLogger('heartbeat'))
+        app.run(host=CONFIG["ip"]["frontend"]["addr"],\
+            port=CONFIG["ip"]["frontend"]["port"])
+        proc.join()
     
