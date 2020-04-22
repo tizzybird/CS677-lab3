@@ -46,7 +46,7 @@ def choose_server(servers, num):
     return index
 
 
-def get_server(server_type, logger=None):
+def get_server(server_type, logger=None, retry_limits=5):
     servers = order_servers
     num = order_num
     status = order_status
@@ -55,15 +55,12 @@ def get_server(server_type, logger=None):
         num = catalog_num
         status = catalog_status
 
-    while True:
-        index = choose_server(servers, num) % len(servers)
-        if status[index]["status"] == ONLINE:
-            break
+    server_ip = None
 
-    server_ip = "http://%s:%d/" % (servers[index]["addr"], servers[index]["port"])
+    index = choose_server(servers, num) % len(servers)
 
-    if logger is not None:
-        logger.debug(server_type, ' server is returned: %s' % server_ip)
+    if status[index]["status"] == ONLINE:
+        server_ip = "http://%s:%d/" % (servers[index]["addr"], servers[index]["port"])
 
     return server_ip
 
@@ -94,11 +91,12 @@ def heartbeat(pairs, logger):
                 
                 logger.info("%s - status: %s" % (ip, repr(status[index])))
 
-        time.sleep(4)
+        time.sleep(3)
 
 
 def start_hearbeat(logger):
     pairs = [(order_servers, order_status), (catalog_servers, catalog_status)]
+    # pairs = [(catalog_servers, catalog_status)]
     logger.warning("Starting heartbeat demon..")
     proc = mp.Process(target=heartbeat, args=(pairs, logger))
     proc.start()

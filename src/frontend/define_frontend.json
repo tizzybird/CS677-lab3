@@ -1,6 +1,7 @@
 {
-    "testenv": 0,
-    "timeout": 8,
+    "testenv": 1,
+    "withCache": 1,
+    "timeout": 3,
     "topics": {
         "DS": "distributed systems",
         "GS": "graduate school"
@@ -41,7 +42,7 @@
                 "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
             },
             "time_diff": {
-                "format": "%(message)f"
+                "format": "%(message)s"
             },
             "heartbeat": {
                 "format": "[%(asctime)s]: %(message)s"

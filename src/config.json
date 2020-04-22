@@ -15,21 +15,21 @@
     },
     "ip": {
         "frontend": {
-            "addr": "128.119.243.147",
+            "addr": "localhost",
             "port": 5077
         },
         "catalog": [{
-            "addr": "128.119.243.164",
+            "addr": "localhost",
             "port": 5066
         }, {
-            "addr": "128.119.243.164",
+            "addr": "localhost",
             "port": 5067
         }],
         "order": [{
-            "addr": "128.119.243.175",
+            "addr": "localhost",
             "port": 5088
         }, {
-            "addr": "128.119.243.175",
+            "addr": "localhost",
             "port": 5089
         }]
     }
