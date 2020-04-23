@@ -8,9 +8,11 @@
         "frontend_search": "frontend_search_time.txt",
         "frontend_lookup": "frontend_lookup_time.txt",
         "frontend_buy": "frontend_buy_time.txt",
+        "catalog_log": "catalog_log.txt",
         "catalog_search": "catalog_search_time.txt",
         "catalog_lookup": "catalog_lookup_time.txt",
         "catalog_buy": "catalog_buy_time.txt",
+        "order_log": "order_log.txt",
         "order_buy": "order_buy_time.txt"
     },
     "ip": {
@@ -20,10 +22,10 @@
         },
         "catalog": [{
             "addr": "localhost",
-            "port": 5066
+            "port": 5000
         }, {
             "addr": "localhost",
-            "port": 5067
+            "port": 5001
         }],
         "order": [{
             "addr": "localhost",
@@ -31,6 +33,10 @@
         }, {
             "addr": "localhost",
             "port": 5089
-        }]
+        }],
+        "lock": {
+            "addr": "localhost",
+            "port": 5500
+        }
     }
 }

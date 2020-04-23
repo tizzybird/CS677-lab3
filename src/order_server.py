@@ -3,31 +3,74 @@ import threading
 import requests
 from datetime import datetime
 import json
+import sys
 app = Flask(__name__)
 sem = threading.BoundedSemaphore(1)
 
 with open('config.json') as f:
     CONFIG = json.load(f)
 
-HOST_IP = CONFIG['ip']['order']['addr']
-HOST_PORT = CONFIG['ip']['order']['port']
+HOST_INDEX = int(sys.argv[1])
+REPLICA_INDEX = 0 if (HOST_INDEX) else 1
 
-CATALOGUE_IP = CONFIG['ip']['catalog']['addr']
-CATALOGUE_PORT = CONFIG['ip']['catalog']['port']
-CATALOGUE_ADDR = CATALOGUE_IP + ':' + str(CATALOGUE_PORT)
+# Catalog server Addresses
+CATALOG0_IP = CONFIG['ip']['catalog'][0]['addr']
+CATALOG0_PORT = CONFIG['ip']['catalog'][0]['port']
+CATALOG1_IP = CONFIG['ip']['catalog'][1]['addr']
+CATALOG1_PORT = CONFIG['ip']['catalog'][1]['port']
+CATALOG0_ADD = CATALOG0_IP + ':' + str(CATALOG0_PORT)
+CATALOG1_ADD = CATALOG1_IP + ':' + str(CATALOG1_PORT)
 
+# Order Server Addresses
+HOST_IP = CONFIG['ip']['order'][HOST_INDEX]['addr']
+HOST_PORT = CONFIG['ip']['order'][HOST_INDEX]['port']
+REPLICA_IP = CONFIG['ip']['order'][REPLICA_INDEX]['addr']
+REPLICA_PORT = CONFIG['ip']['order'][REPLICA_INDEX]['port']
+REPLICA_ADD = REPLICA_IP + ':' + str(REPLICA_PORT)
+
+TARGET_CATALOG_ADDR  = CATALOG0_ADD
+ALT_CATALOG_ADDR = CATALOG1_ADD
+
+LOCK_ADDR = CONFIG['ip']['lock']['addr'] + ':' + str(CONFIG['ip']['lock']['port'])
+
+log_req = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_log"]
 log_buy = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_buy"]
+
+
+
+def swap():
+    global TARGET_CATALOG_ADDR
+    global ALT_CATALOG_ADDR
+    tmp = TARGET_CATALOG_ADDR
+    TARGET_CATALOG_ADDR = ALT_CATALOG_ADDR
+    ALT_CATALOG_ADDR = tmp
+    return
+
+
+
+
 
 # Endpoint for the buy function
 @app.route('/buy/<item_no>', methods=['GET'])
 def buy(item_no):
+    global TARGET_CATALOG_ADDR
+    global ALT_CATALOG_ADDR
     start_time = datetime.now()
-    sem.acquire()
-    print("Buy request for item " + item_no, file = open('../tests/order_log.txt', 'a'))
-    check_availability = requests.get('http://' + CATALOGUE_ADDR + '/lookup/' + item_no)
-    check_availability = check_availability.json()
-    if(check_availability['stock'] == 0):
-        sem.release()
+    # Obtaining exclusive access via a  distributed lock
+    requests.get('http://' + LOCK_ADDR + '/access')
+    with open(log_req, 'a') as f:
+        f.write("Buy request for item " + item_no)
+    while (True):
+        try:
+            check_availability = requests.get('http://' + TARGET_CATALOG_ADDR + '/lookup/' + item_no)
+            check_availability.raise_for_status()
+            break
+        except:
+            swap()
+
+    if(check_availability.json()['stock'] == 0):
+        # Releasing distributed lock
+        requests.put('http://' + LOCK_ADDR + '/release')
         end_time = datetime.now()
         with open(log_buy, 'a') as f:
             f.write('%f\n' % (end_time - start_time).total_seconds())
@@ -37,14 +80,31 @@ def buy(item_no):
             'Reason': 'Item out of stock'
         }), 201
 
-    updated_book = requests.put('http://' + CATALOGUE_ADDR + '/update/' + item_no, json={'stock': check_availability['stock'] - 1})
-    sem.release()
+    while (True):
+        try:
+            purchase = requests.put('http://' + TARGET_CATALOG_ADDR + '/update/' + item_no, json={'dec': 1})
+            purchase.raise_for_status()
+            try:
+                sync = requests.get('http://' + ALT_CATALOG_ADDR + '/order_sync')
+                sync.raise_for_status()
+                if (sync.json()['status']):
+                    break
+                else:
+                    swap()
+                    continue
+            except:
+                break
+        except:
+            swap()
+
+    purchase = purchase.json()
+    requests.put('http://' + LOCK_ADDR + '/release')
     end_time = datetime.now()
     with open(log_buy, 'a') as f:
         f.write('%f\n' % (end_time - start_time).total_seconds())
     return jsonify({
         'BuyStatus': 'Success',
-        'Item': updated_book.json()['book_name']
+        'Item': purchase['book_name']
     })
 
 @app.route('/echo', methods=['GET'])
