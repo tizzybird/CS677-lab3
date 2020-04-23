@@ -40,7 +40,7 @@ def sync_inventory():
         inventory = json.loads(synced_inventory)
     except:
         print("In except")
-        catalog = open('inventory.csv', 'r+')
+        catalog = open('catalog/inventory.csv', 'r+')
         catalog = list(csv.reader(catalog))
         for row in catalog:
             tmp = [col.strip() for col in row]
