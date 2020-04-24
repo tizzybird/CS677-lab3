@@ -22,17 +22,17 @@
         },
         "catalog": [{
             "addr": "localhost",
-            "port": 5000
+            "port": 5073
         }, {
             "addr": "localhost",
-            "port": 5001
+            "port": 5074
         }],
         "order": [{
             "addr": "localhost",
-            "port": 5088
+            "port": 5083
         }, {
             "addr": "localhost",
-            "port": 5089
+            "port": 5084
         }],
         "lock": {
             "addr": "localhost",
