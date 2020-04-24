@@ -11,7 +11,7 @@ import threading as thd
 with open('config.json') as f:
     CONFIG = json.load(f)
 
-with open('define_frontend.json') as f:
+with open('frontend/define_frontend.json') as f:
     DEFINE = json.load(f)
 
 PRINT_LOCK = Lock()
@@ -20,6 +20,7 @@ SEARCH = 1
 LOOKUP = 2
 BUY    = 3
 
+# actions = [SEARCH, LOOKUP, BUY]
 actions = [SEARCH, LOOKUP, BUY]
 
 ip_frontend = "http://%s:%d/" % (CONFIG["ip"]["frontend"]["addr"], CONFIG["ip"]["frontend"]["port"])
@@ -55,7 +56,7 @@ class Client(thd.Thread):
             action = random.choice(actions)
             
             if action == SEARCH:
-                topic = random.choice(list(DEFINE['topics'].values()))
+                topic = random.choice(list(DEFINE['topics'].keys()))
                 params = {
                     'topic': topic
                 }
@@ -63,7 +64,7 @@ class Client(thd.Thread):
                 self._print('Client %d starts searching topic: %s', arg=(self.id, topic))
                 
                 start_time = time.time()
-                res = requests.get(ip_frontend + 'search', params=params)
+                res = requests.get(ip_frontend + 'search', params=params, timeout=5)
                 end_time = time.time()
                 diff = (end_time - start_time)
                 msg = 'Client %d search request success! Time: %f' if res.status_code == 200\
@@ -107,6 +108,7 @@ class Client(thd.Thread):
                 self._print(msg, arg=(self.id, diff))
                 self._log('%f\n' % diff, log_buy)
 
+            time.sleep(2)
 
 if __name__ == '__main__':
     clients = []
