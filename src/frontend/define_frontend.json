@@ -56,22 +56,22 @@
             },
             "f_search": {
                 "class": "logging.FileHandler",
-                "filename": "frontend_search_time.log",
+                "filename": "logs/frontend_search_time.log",
                 "formatter": "time_diff"
             },
             "f_lookup": {
                 "class": "logging.FileHandler",
-                "filename": "frontend_lookup_time.log",
+                "filename": "logs/frontend_lookup_time.log",
                 "formatter": "time_diff"
             },
             "f_buy": {
                 "class": "logging.FileHandler",
-                "filename": "frontend_buy_time.log",
+                "filename": "logs/frontend_buy_time.log",
                 "formatter": "time_diff"
             },
             "heartbeat": {
                 "class": "logging.FileHandler",
-                "filename": "frontend_heartbeat.log",
+                "filename": "logs/frontend_heartbeat.log",
                 "formatter": "heartbeat"
             }
         },
