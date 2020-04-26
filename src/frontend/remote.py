@@ -15,6 +15,12 @@ reset_value = 999999
 ########################################
 
 def init(servers):
+    """
+    Create shared information of remote servers.
+    :param servers: server information from config.json
+    :return: a tuple including an array of static ip information of servers
+            and an process-safe object recording server status
+    """
     # shared server status information
     manager = Manager()
     obj = manager.dict()
@@ -35,7 +41,13 @@ def init(servers):
     return result, obj
 
 
-def choose_server(servers, num):
+def choose_server(num):
+    """
+    Basicly it simply adds 1 to the provided num argument and resets
+    the value if num argument is too large
+    :param num: process-safe shared variable
+    :return: value after added 1
+    """
     index = 0
     with num.get_lock():
         index = num.value
@@ -46,7 +58,14 @@ def choose_server(servers, num):
     return index
 
 
-def get_server(server_type, logger=None, retry_limits=5):
+def get_server(server_type):
+    """
+    Choosing a remote server according to load-balancing algorithm.
+    Remote servers are chosen evenly.
+    :param server_type: the type of remote server, "catalog" or "order"
+    :return: return the ip information of the chosen server. If its status
+            is UNKNOWN, return None
+    """
     servers = order_servers
     num = order_num
     status = order_status
@@ -55,10 +74,9 @@ def get_server(server_type, logger=None, retry_limits=5):
         num = catalog_num
         status = catalog_status
 
+    # still need to modulo total number of servers
+    index = choose_server(num) % len(servers)
     server_ip = None
-
-    index = choose_server(servers, num) % len(servers)
-
     if status[index]["status"] == ONLINE:
         server_ip = "http://%s:%d/" % (servers[index]["addr"], servers[index]["port"])
 
@@ -66,18 +84,21 @@ def get_server(server_type, logger=None, retry_limits=5):
 
 
 def heartbeat(pairs, logger):
-    # TODO: asyncio
-    # loop = asyncio.get_event_loop()
-    # async def ping(ip, index, proxy):
-    #     res = await loop.run_in_executor(None, requests.get, url)
-
+    """
+    The function sends TCP echo requests to remote servers and waits for responds.
+    If an echo request is timeout, it modifies the corresponding server to UNKNOWN
+    status until the server is back ONLINE.
+    :param pairs: remote catalog servers and order servers to be monitored
+    :param logger: logger
+    TODO: Send all heartbeat requests simultaneously with asyncio
+    """
     while True:
         for servers, status in pairs:
             for index in range(len(servers)):
                 server = servers[index]
                 ip = "http://%s:%d/echo" % (server["addr"], server["port"])
                 try:
-                    res = rq.get(ip, timeout=5)
+                    res = rq.get(ip, timeout=3)
                     res.raise_for_status()
                     status[index] = {
                         "status": ONLINE,
@@ -95,9 +116,15 @@ def heartbeat(pairs, logger):
 
 
 def start_hearbeat(logger):
+    """
+    The function will create a background process to monitor the status
+    of all remote servers.
+    :param logger: logger
+    :return: the heartbeat process is returned
+    """
     pairs = [(order_servers, order_status), (catalog_servers, catalog_status)]
     # pairs = [(catalog_servers, catalog_status)]
-    logger.warning("Starting heartbeat demon..")
+    logger.info("Starting heartbeat demon..")
     proc = mp.Process(target=heartbeat, args=(pairs, logger))
     proc.start()
 

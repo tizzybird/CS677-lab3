@@ -1,11 +1,10 @@
 from multiprocessing import Manager
 from datetime import datetime
 
-# mainly for read operation
-
+# only for read operation
 manager = Manager()
 cache = manager.dict()
-# Time that cached values would no longer be valid
+# Timeout value that cached values would no longer be valid
 timeout = 180
 
 def set_pair(key, value):
