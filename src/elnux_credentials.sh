@@ -27,3 +27,4 @@ else
     OrderServer2=$TargetServer
     ClientServer=$TargetServer
 fi
+LogPath=`python3 -c "import sys, json; f=open(sys.argv[1]); j=json.load(f); print(j['log_path']['folder_path'])" config.json`
