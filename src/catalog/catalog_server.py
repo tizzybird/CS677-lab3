@@ -8,7 +8,7 @@ import csv
 app = Flask(__name__)
 sem = threading.BoundedSemaphore(1)
 
-with open('config.json') as f:
+with open('../config.json') as f:
     CONFIG = json.load(f)
 
 HOST_INDEX = int(sys.argv[1])
@@ -22,10 +22,10 @@ REPLICA_PORT = CONFIG['ip']['catalog'][REPLICA_INDEX]['port']
 HOST_ADD = HOST_IP + ':' + str(HOST_PORT)
 REPLICA_ADD = REPLICA_IP + ':' + str(REPLICA_PORT)
 
-log_req = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_log"]
-log_search = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_search"]
-log_lookup = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_lookup"]
-log_buy    = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_buy"]
+log_req = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_log"]
+log_search = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_search"]
+log_lookup = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_lookup"]
+log_buy    = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_buy"]
 
 
 
@@ -41,7 +41,7 @@ def sync_inventory():
         inventory = json.loads(synced_inventory)
     except:
         print("In except")
-        catalog = open('catalog/inventory.csv', 'r+')
+        catalog = open('inventory.csv', 'r+')
         catalog = list(csv.reader(catalog))
         for row in catalog:
             tmp = [col.strip() for col in row]
@@ -82,7 +82,7 @@ def order_sync():
 
 @app.route('/sync', methods=['GET'])
 def sync():
-    sem.acquire()
+    sem.acquire(timeout=0.5)
     db = json.dumps(inventory)
     return jsonify({ 'inventory': db })
 

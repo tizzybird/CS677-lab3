@@ -6,7 +6,7 @@ app = Flask(__name__)
 access_sem = threading.BoundedSemaphore(1)
 
 
-with open('config.json') as f:
+with open('../config.json') as f:
     CONFIG = json.load(f)
 
 HOST_IP = CONFIG['ip']['lock']['addr']

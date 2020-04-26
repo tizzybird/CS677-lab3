@@ -7,7 +7,7 @@ import sys
 app = Flask(__name__)
 sem = threading.BoundedSemaphore(1)
 
-with open('config.json') as f:
+with open('../config.json') as f:
     CONFIG = json.load(f)
 
 HOST_INDEX = int(sys.argv[1])
@@ -33,8 +33,8 @@ ALT_CATALOG_ADDR = CATALOG1_ADD
 
 LOCK_ADDR = CONFIG['ip']['lock']['addr'] + ':' + str(CONFIG['ip']['lock']['port'])
 
-log_req = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_log"]
-log_buy = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_buy"]
+log_req = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_log"]
+log_buy = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_buy"]
 
 
 
