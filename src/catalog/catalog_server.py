@@ -14,6 +14,7 @@ with open('config.json') as f:
 HOST_INDEX = int(sys.argv[1])
 REPLICA_INDEX = 0 if (HOST_INDEX) else 1
 
+FRONTEND_IP = "http://%s:%d/" % (CONFIG["ip"]["frontend"]["addr"], CONFIG["ip"]["frontend"]["port"])
 HOST_IP = CONFIG['ip']['catalog'][HOST_INDEX]['addr']
 HOST_PORT = CONFIG['ip']['catalog'][HOST_INDEX]['port']
 REPLICA_IP = CONFIG['ip']['catalog'][REPLICA_INDEX]['addr']
@@ -153,6 +154,12 @@ def update(item_no):
                 with open(log_req, 'a') as f:
                     f.write("Stock for item " + item_no + " reduced to " + str(books[2]))
 
+                # cache invalidation
+                params = {
+                    'item_num': books[0],
+                    'topic': books[4]
+                }
+                requests.put(FRONTEND_IP + 'invalidate', params=params)
                 sem.release()
                 end_time = datetime.now()
             

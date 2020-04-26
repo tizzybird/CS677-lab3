@@ -25,6 +25,12 @@ app = Flask(__name__)
 
 @app.route('/search', methods=['GET'])
 def search():
+    """
+    Function for responding topic searching and item lookup
+    :param topic: searching by a specific topic
+    :param lookupNum: lookup information of a specific item id
+    :return: a json object if success, otherwise a failed message
+    """
     cache_ret = None
     is_from_cache = False
     start_time = datetime.now()
@@ -144,6 +150,12 @@ def search():
 
 @app.route('/buy', methods=['POST'])
 def buy():
+    """
+    Function for handling buy requests
+    :param buyNum: buy a book with item id
+    :return: return failed message when item id is none or order servers are offline,
+            otherwise a success message is returned
+    """
     start_time = datetime.now()
     buy_num = request.values.get('buyNum')
 
@@ -167,13 +179,7 @@ def buy():
             break
         except:
             app.logger.info("Order server is timeout; retry time(s): %d" % failureCount)
-        finally:
-            # remove cache no matter success or failed
-            # TODO: modify information returned from search operation,
-            # Otherwise clear cache of searching results entirely
-            key = repr(('lookupNum', buy_num))
-            cache.remove(key)
-            app.logger.info("[Cache]-------------------- Remove cache of %s" % key)
+
     
     end_time = datetime.now()
     diff = (end_time - start_time).total_seconds()
@@ -186,7 +192,31 @@ def buy():
     return "Failed", 201
 
 
+@app.route('/invalidate', methods=['PUT'])
+def invalidate():
+    """
+    Delete specified item from cache.
+    :param item_num: item id
+    :param topic: topic
+    :return: always return success
+    """
+    item_num  = request.values.get('item_num')
+    if item_num is not None:
+        key = repr(('lookupNum', item_num))
+        cache.remove(key)
+        app.logger.info("[Cache]-------------------- Remove %s" % key)
+    
+    topic_val = request.values.get('topic')
+    if topic_val is not None:
+        key = repr(('topic', topic_val))
+        cache.remove(key)
+        app.logger.info("[Cache]-------------------- Remove %s" % key)
+
+    return "Success"
+
+
 if __name__ == '__main__':
+    # start heartbeat protocol
     proc = remote.start_hearbeat(logging.getLogger('heartbeat'))
     
     if DEFINE["testenv"] == 0:
