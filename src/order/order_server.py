@@ -33,8 +33,8 @@ ALT_CATALOG_ADDR = CATALOG1_ADD
 
 LOCK_ADDR = CONFIG['ip']['lock']['addr'] + ':' + str(CONFIG['ip']['lock']['port'])
 
-log_req = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_log"]
-log_buy = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_buy"]
+log_req = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_log"]
+log_buy = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_buy"]
 
 
 # Utitlity function to swap the MASTER and SLAVE statuses of the cataslog server replicas. This is relevant as
