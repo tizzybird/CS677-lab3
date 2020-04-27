@@ -1,5 +1,5 @@
 {
-    "client_numbers": 1,
+    "client_numbers": 5 ,
     "log_path": {
         "folder_path": "./logs/",
         "client_search": "client%d_search_time.txt",
@@ -17,26 +17,26 @@
     },
     "ip": {
         "frontend": {
-            "addr": "localhost",
-            "port": 5077
+            "addr": "128.119.243.175",
+            "port": 35155
         },
         "catalog": [{
-            "addr": "localhost",
-            "port": 5073
+            "addr": "128.119.243.147",
+            "port": 35150
         }, {
-            "addr": "localhost",
-            "port": 5074
+            "addr": "128.119.243.147",
+            "port": 35151
         }],
         "order": [{
-            "addr": "localhost",
-            "port": 5083
+            "addr": "128.119.243.164",
+            "port": 35152
         }, {
-            "addr": "localhost",
-            "port": 5084
+            "addr": "128.119.243.164",
+            "port": 35153
         }],
         "lock": {
-            "addr": "localhost",
-            "port": 5180
+            "addr": "128.119.243.164",
+            "port": 35154
         }
     }
 }
