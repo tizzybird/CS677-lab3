@@ -1,12 +1,12 @@
 #!/bin/bash
-Username="yensungchen"
-TargetPath=./cs677/lab3/src
+Username="kameshbalasu"
+TargetPath=./cs677/lab_3/lab-3-lab-3-balasubramanian-chen/src
 
 # NOTE that if you would like to deploy all servers on a single machine,
 # Please change below variables to the address of a same single server,
 # Otherwise it fetchs elnux server IPs from config.json
 # You should change those values in config.json
-MultipleServer=0
+MultipleServer=1
 
 if [ $MultipleServer == 1 ];
 then

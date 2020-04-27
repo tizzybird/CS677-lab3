@@ -37,7 +37,8 @@ log_req = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_lo
 log_buy = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_buy"]
 
 
-
+# Utitlity function to swap the MASTER and SLAVE statuses of the cataslog server replicas. This is relevant as
+# all update requests go to the MASTER and have the SLAVE sync
 def swap():
     global TARGET_CATALOG_ADDR
     global ALT_CATALOG_ADDR
@@ -60,6 +61,9 @@ def buy(item_no):
     requests.get('http://' + LOCK_ADDR + '/access')
     with open(log_req, 'a') as f:
         f.write("Buy request for item " + item_no)
+
+    # Lookup item at an online catalog server. If the TARGET server is down, the TARGET and ALTERNATE roles
+    # are swapped and the request is resent.
     while (True):
         try:
             check_availability = requests.get('http://' + TARGET_CATALOG_ADDR + '/lookup/' + item_no)
@@ -80,6 +84,8 @@ def buy(item_no):
             'Reason': 'Item out of stock'
         }), 201
 
+    # The implementation of an update at both replicas that is resilient to faults. The process is
+    # explained in the design doc.
     while (True):
         try:
             purchase = requests.put('http://' + TARGET_CATALOG_ADDR + '/update/' + item_no, json={'dec': 1})
@@ -98,6 +104,7 @@ def buy(item_no):
             swap()
 
     purchase = purchase.json()
+    # Release distributed lock
     requests.put('http://' + LOCK_ADDR + '/release')
     end_time = datetime.now()
     with open(log_buy, 'a') as f:

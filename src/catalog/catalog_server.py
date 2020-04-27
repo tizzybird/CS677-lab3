@@ -32,6 +32,7 @@ log_buy    = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catal
 # This is the catalog. Rows are stored as [item_no, book_name, stock, cost, topic]
 inventory = []
 
+# Synce function. This syncs the catalog server with the replica and runs every time this server starts.
 def sync_inventory():
     global inventory
     try:
@@ -59,11 +60,12 @@ def sync_inventory():
     return
 
 
-
+# Endpoint for the order server to request this catalog replica to sync with the other catalog replica
 @app.route('/order_sync', methods = ['GET'])
 def order_sync():
     global inventory
     try:
+        # Syncing with  other replica
         res = requests.get('http://' + REPLICA_ADD + '/sync')
         res.raise_for_status()
         synced_inventory = res.json()['inventory']
@@ -79,7 +81,7 @@ def order_sync():
     return jsonify({ 'status': success })
 
 
-
+# Repsond to a sync request from another catalog replica by responding with current inventory
 @app.route('/sync', methods=['GET'])
 def sync():
     sem.acquire(timeout=0.5)
@@ -87,7 +89,7 @@ def sync():
     return jsonify({ 'inventory': db })
 
 
-
+# Utility function block this replica from processing any requests while another replica is syncing with it
 @app.route('/hold', methods=['PUT'])
 def hold():
     req =  request.get_json()
