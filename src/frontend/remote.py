@@ -135,7 +135,7 @@ def start_hearbeat(logger):
 order_num = Value('i', 0)
 catalog_num = Value('i', 0)
 
-with open('../config.json') as f:
+with open('config.json') as f:
     CONFIG = json.load(f)
 
 order_servers, order_status = init(CONFIG['ip']['order'])

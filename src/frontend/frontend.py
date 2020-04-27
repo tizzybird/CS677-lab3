@@ -1,11 +1,11 @@
 import json
 
 # common config
-with open('../config.json') as f:
+with open('config.json') as f:
     CONFIG = json.load(f)
 
 # frontend defines
-with open('define_frontend.json') as f:
+with open('frontend/define_frontend.json') as f:
     DEFINE = json.load(f)
 
 

@@ -8,7 +8,7 @@ import csv
 app = Flask(__name__)
 sem = threading.BoundedSemaphore(1)
 
-with open('../config.json') as f:
+with open('config.json') as f:
     CONFIG = json.load(f)
 
 HOST_INDEX = int(sys.argv[1])
@@ -41,7 +41,7 @@ def sync_inventory():
         inventory = json.loads(synced_inventory)
     except:
         print("In except")
-        catalog = open('inventory.csv', 'r+')
+        catalog = open('catalog/inventory.csv', 'r+')
         catalog = list(csv.reader(catalog))
         for row in catalog:
             tmp = [col.strip() for col in row]

@@ -7,7 +7,7 @@ import sys
 app = Flask(__name__)
 sem = threading.BoundedSemaphore(1)
 
-with open('../config.json') as f:
+with open('config.json') as f:
     CONFIG = json.load(f)
 
 HOST_INDEX = int(sys.argv[1])
