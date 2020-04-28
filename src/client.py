@@ -74,7 +74,7 @@ class Client(thd.Thread):
                 self._log('%f\n' % diff, log_search)
 
             elif action == LOOKUP:
-                item_num = random.randint(1, 4)
+                item_num = random.randint(1, 7)
                 params = {
                     'lookupNum': item_num
                 }
@@ -92,7 +92,7 @@ class Client(thd.Thread):
                 self._log('%f\n' % diff, log_lookup)
 
             else:
-                item_num = random.randint(1, 4)
+                item_num = random.randint(1, 7)
                 params = {
                     'buyNum': item_num
                 }
