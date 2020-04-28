@@ -1,7 +1,7 @@
 #!/bin/bash
-Username="kameshbalasu"
-TargetPath=./cs677/lab3/lab3_alt/src
-
+Username="yensungchen"
+TargetPath=./cs677/lab3/src
+  
 # NOTE that if you would like to deploy all servers on a single machine,
 # Please change below variables to the address of a same single server,
 # Otherwise it fetchs elnux server IPs from config.json
