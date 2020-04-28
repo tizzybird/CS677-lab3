@@ -1,6 +1,6 @@
 #!/bin/bash
-Username="kameshbalasu"
-TargetPath=./cs677/lab_3/lab-3-lab-3-balasubramanian-chen/src
+Username="yensungchen"
+TargetPath=./cs677/lab3/src
 
 # NOTE that if you would like to deploy all servers on a single machine,
 # Please change below variables to the address of a same single server,
@@ -13,7 +13,7 @@ then
     FrontendServer=`python3 -c "import sys, json; f=open(sys.argv[1]); j=json.load(f); print(j['ip']['frontend']['addr'])" config.json`
     CatalogServer1=`python3 -c "import sys, json; f=open(sys.argv[1]); j=json.load(f); print(j['ip']['catalog'][0]['addr'])" config.json`
     CatalogServer2=`python3 -c "import sys, json; f=open(sys.argv[1]); j=json.load(f); print(j['ip']['catalog'][1]['addr'])" config.json`
-    LockServer=`python3 -c "import sys, json; f=open(sys.argv[1]); j=json.load(f); print(j['ip']['lock'])" config.json`
+    LockServer=`python3 -c "import sys, json; f=open(sys.argv[1]); j=json.load(f); print(j['ip']['lock']['addr'])" config.json`
     OrderServer1=`python3 -c "import sys, json; f=open(sys.argv[1]); j=json.load(f); print(j['ip']['order'][0]['addr'])" config.json`
     OrderServer2=`python3 -c "import sys, json; f=open(sys.argv[1]); j=json.load(f); print(j['ip']['order'][1]['addr'])" config.json`
     ClientServer=elnux3.cs.umass.edu
