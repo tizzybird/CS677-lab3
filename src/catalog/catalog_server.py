@@ -22,10 +22,10 @@ REPLICA_PORT = CONFIG['ip']['catalog'][REPLICA_INDEX]['port']
 HOST_ADD = HOST_IP + ':' + str(HOST_PORT)
 REPLICA_ADD = REPLICA_IP + ':' + str(REPLICA_PORT)
 
-log_req = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_log"]
-log_search = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_search"]
-log_lookup = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_lookup"]
-log_buy    = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_buy"]
+log_req = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_log"]
+log_search = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_search"]
+log_lookup = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_lookup"]
+log_buy    = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["catalog_buy"]
 
 
 

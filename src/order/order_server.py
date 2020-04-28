@@ -33,8 +33,8 @@ ALT_CATALOG_ADDR = CATALOG1_ADD
 
 LOCK_ADDR = CONFIG['ip']['lock']['addr'] + ':' + str(CONFIG['ip']['lock']['port'])
 
-log_req = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_log"]
-log_buy = '.' + CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_buy"]
+log_req = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_log"]
+log_buy = CONFIG["log_path"]["folder_path"] + CONFIG["log_path"]["order_buy"]
 
 
 # Utitlity function to swap the MASTER and SLAVE statuses of the cataslog server replicas. This is relevant as
@@ -80,7 +80,7 @@ def buy(item_no):
             f.write('%f\n' % (end_time - start_time).total_seconds())
         return jsonify({
             'BuyStatus': 'Error',
-            'Item': check_availability['book_name'],
+            'Item': check_availability.json()['book_name'],
             'Reason': 'Item out of stock'
         }), 201
 
